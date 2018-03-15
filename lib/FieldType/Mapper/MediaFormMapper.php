@@ -14,14 +14,18 @@ use EzSystems\RepositoryForms\Data\FieldDefinitionData;
 use EzSystems\RepositoryForms\FieldType\DataTransformer\MediaValueTransformer;
 use EzSystems\RepositoryForms\FieldType\FieldDefinitionFormMapperInterface;
 use EzSystems\RepositoryForms\FieldType\FieldValueFormMapperInterface;
+use EzSystems\RepositoryForms\FieldType\MaxUploadSize;
 use EzSystems\RepositoryForms\Form\Type\FieldType\MediaFieldType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Range;
 
 class MediaFormMapper implements FieldDefinitionFormMapperInterface, FieldValueFormMapperInterface
 {
+    use MaxUploadSize;
+
     /** @var FieldTypeService */
     private $fieldTypeService;
 
@@ -40,13 +44,13 @@ class MediaFormMapper implements FieldDefinitionFormMapperInterface, FieldValueF
                 'constraints' => [
                     new Range([
                         'min' => 0,
-                        'max' => $this->getMaxUploadSize(),
-                    ]),
+                        'max' => $this->getMaxUploadSize()/(1024*1024),
+                    ])
                 ],
                 'attr' => [
                     'min' => 0,
-                    'max' => $this->getMaxUploadSize(),
-                ],
+                    'max' => $this->getMaxUploadSize()/(1024*1024),
+                ]
             ])
             ->add('mediaType', ChoiceType::class, [
                 'choices' => [

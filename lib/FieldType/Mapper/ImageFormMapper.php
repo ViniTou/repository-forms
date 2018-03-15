@@ -13,14 +13,18 @@ use EzSystems\RepositoryForms\Data\FieldDefinitionData;
 use EzSystems\RepositoryForms\FieldType\DataTransformer\ImageValueTransformer;
 use EzSystems\RepositoryForms\FieldType\FieldDefinitionFormMapperInterface;
 use EzSystems\RepositoryForms\FieldType\FieldValueFormMapperInterface;
+use EzSystems\RepositoryForms\FieldType\MaxUploadSize;
 use EzSystems\RepositoryForms\Form\Type\FieldType\ImageFieldType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\Exception\AccessException;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Range;
 
 class ImageFormMapper implements FieldDefinitionFormMapperInterface, FieldValueFormMapperInterface
 {
+    use MaxUploadSize;
+
     /** @var FieldTypeService */
     private $fieldTypeService;
 
@@ -39,13 +43,13 @@ class ImageFormMapper implements FieldDefinitionFormMapperInterface, FieldValueF
                 'constraints' => [
                     new Range([
                         'min' => 0,
-                        'max' => $this->getMaxUploadSize(),
-                    ]),
+                        'max' => $this->getMaxUploadSize()/(1024*1024),
+                    ])
                 ],
                 'attr' => [
                     'min' => 0,
-                    'max' => $this->getMaxUploadSize(),
-                ],
+                    'max' => $this->getMaxUploadSize()/(1024*1024),
+                ]
             ]);
     }
 

@@ -5,6 +5,7 @@
  */
 namespace EzSystems\RepositoryForms\Form\Type\FieldType;
 
+use EzSystems\RepositoryForms\FieldType\MaxUploadSize;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -19,6 +20,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class BinaryBaseFieldType extends AbstractType
 {
+    use MaxUploadSize;
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
@@ -52,33 +55,5 @@ class BinaryBaseFieldType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(['translation_domain' => 'ezrepoforms_fieldtype']);
-    }
-
-    private function getMaxUploadSize()
-    {
-        static $value = null;
-        if ($value === null) {
-            $value = $this->str2bytes(ini_get('upload_max_filesize'));
-        }
-
-        return $value;
-    }
-
-    private function str2bytes($str)
-    {
-        $str = strtoupper(trim($str));
-
-        $value = substr($str, 0, -1);
-        $unit = substr($str, -1);
-        switch ($unit) {
-            case 'G':
-                $value *= 1024;
-            case 'M':
-                $value *= 1024;
-            case 'K':
-                $value *= 1024;
-        }
-
-        return (int) $value;
     }
 }

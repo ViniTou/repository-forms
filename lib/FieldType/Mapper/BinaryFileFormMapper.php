@@ -13,12 +13,16 @@ use EzSystems\RepositoryForms\Data\FieldDefinitionData;
 use EzSystems\RepositoryForms\FieldType\DataTransformer\BinaryFileValueTransformer;
 use EzSystems\RepositoryForms\FieldType\FieldDefinitionFormMapperInterface;
 use EzSystems\RepositoryForms\FieldType\FieldValueFormMapperInterface;
+use EzSystems\RepositoryForms\FieldType\MaxUploadSize;
 use EzSystems\RepositoryForms\Form\Type\FieldType\BinaryFileFieldType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Validator\Constraints\Range;
 
 class BinaryFileFormMapper implements FieldDefinitionFormMapperInterface, FieldValueFormMapperInterface
 {
+    use MaxUploadSize;
+
     /** @var FieldTypeService */
     private $fieldTypeService;
 
@@ -38,13 +42,13 @@ class BinaryFileFormMapper implements FieldDefinitionFormMapperInterface, FieldV
                 'constraints' => [
                     new Range([
                         'min' => 0,
-                        'max' => $this->getMaxUploadSize(),
-                    ]),
+                        'max' => $this->getMaxUploadSize()/(1024*1024),
+                    ])
                 ],
                 'attr' => [
                     'min' => 0,
-                    'max' => $this->getMaxUploadSize(),
-                ],
+                    'max' => $this->getMaxUploadSize()/(1024*1024),
+                ]
             ]);
     }
 
