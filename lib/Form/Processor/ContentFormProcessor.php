@@ -14,6 +14,7 @@ use eZ\Publish\API\Repository\Values\Content\Content;
 use eZ\Publish\API\Repository\Values\Content\ContentStruct;
 use eZ\Publish\API\Repository\Values\Content\Location;
 use eZ\Publish\Core\Base\Exceptions\InvalidArgumentException;
+use eZ\Publish\Core\MVC\Symfony\SiteAccess;
 use EzSystems\RepositoryForms\Data\Content\ContentCreateData;
 use EzSystems\RepositoryForms\Data\Content\ContentUpdateData;
 use EzSystems\RepositoryForms\Data\NewnessCheckable;
@@ -21,6 +22,7 @@ use EzSystems\RepositoryForms\Event\FormActionEvent;
 use EzSystems\RepositoryForms\Event\RepositoryFormEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 /**
@@ -37,25 +39,25 @@ class ContentFormProcessor implements EventSubscriberInterface
     /** @var \Symfony\Component\Routing\RouterInterface */
     private $router;
 
-    /** @var \eZ\Publish\API\Repository\URLAliasService */
-    private $urlAliasService;
+    /** @var \Symfony\Component\Routing\Generator\UrlGeneratorInterface */
+    private $urlGenerator;
 
     /**
      * @param \eZ\Publish\API\Repository\ContentService $contentService
      * @param \eZ\Publish\API\Repository\LocationService $locationService
      * @param \Symfony\Component\Routing\RouterInterface $router
-     * @param \eZ\Publish\API\Repository\URLAliasService $urlAliasService
+     * @param \Symfony\Component\Routing\Generator\UrlGeneratorInterface $urlGenerator
      */
     public function __construct(
         ContentService $contentService,
         LocationService $locationService,
         RouterInterface $router,
-        URLAliasService $urlAliasService
+        UrlGeneratorInterface $urlGenerator
     ) {
         $this->contentService = $contentService;
         $this->locationService = $locationService;
         $this->router = $router;
-        $this->urlAliasService = $urlAliasService;
+        $this->urlGenerator = $urlGenerator;
     }
 
     /**
@@ -125,26 +127,8 @@ class ContentFormProcessor implements EventSubscriberInterface
 
         $location = $this->locationService->loadLocation($content->contentInfo->mainLocationId);
 
-        $redirectUrl = $form['redirectUrlAfterPublish']->getData() ?: $this->getSystemUrl($location, [$content->versionInfo->initialLanguageCode]);
+        $redirectUrl = $form['redirectUrlAfterPublish']->getData() ?: $this->urlGenerator->generate($location, [], UrlGeneratorInterface::ABSOLUTE_URL);
         $event->setResponse(new RedirectResponse($redirectUrl));
-    }
-
-    /**
-     * @param \eZ\Publish\API\Repository\Values\Content\Location $location
-     * @param array $prioritizedLanguageList
-     *
-     * @return string
-     *
-     * @throws \eZ\Publish\API\Repository\Exceptions\NotFoundException
-     */
-    private function getSystemUrl(Location $location, array $prioritizedLanguageList): string
-    {
-        return $this->urlAliasService->reverseLookup(
-            $location,
-            null,
-            true,
-            $prioritizedLanguageList
-        )->path;
     }
 
     /**
@@ -189,10 +173,7 @@ class ContentFormProcessor implements EventSubscriberInterface
 
         $locationToRedirect = $this->locationService->loadLocation($redirectionLocationId);
 
-        $url = $this->getSystemUrl(
-            $locationToRedirect,
-            [$locationToRedirect->contentInfo->mainLanguageCode]
-        );
+        $url = $this->urlGenerator->generate($locationToRedirect);
 
         $event->setResponse(new RedirectResponse($url));
     }

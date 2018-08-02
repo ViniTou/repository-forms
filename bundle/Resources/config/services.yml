@@ -208,7 +208,7 @@ services:
             - '@ezpublish.api.service.content'
             - '@ezpublish.api.service.location'
             - '@router'
-            - '@ezpublish.api.service.url_alias'
+            - '@ezpublish.urlalias_router'
         tags:
             - { name: kernel.event_subscriber }
 
